@@ -1,0 +1,9 @@
+{
+  "updatedAt": "",
+  "products": [
+    {"id":"bouquet-1","category":"Букеты","name":"Букет цветов","description":"Готовый букет для особенного момента","price":"","oldPrice":"","visible":true},
+    {"id":"flowers-1","category":"Цветы","name":"Свежие цветы","description":"Цветы для букета или композиции","price":"","oldPrice":"","visible":true},
+    {"id":"balloons-1","category":"Шары","name":"Воздушные шары","description":"Яркое дополнение к подарку","price":"","oldPrice":"","visible":true},
+    {"id":"gift-1","category":"Подарки","name":"Подарок","description":"Красивое дополнение к цветам","price":"","oldPrice":"","visible":true}
+  ]
+}
