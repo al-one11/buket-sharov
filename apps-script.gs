@@ -5,11 +5,10 @@ const PRODUCTS = [
   {id:'gift-1', category:'Подарки', name:'Подарок', description:'Красивое дополнение к цветам', price:'', oldPrice:'', visible:true}
 ];
 
-// 1) Создайте Google Таблицу.
-// 2) Откройте Расширения → Apps Script и вставьте этот код.
-// 3) Разверните как веб-приложение: выполнять от вашего аккаунта, доступ — Все.
-// 4) Скопируйте URL веб-приложения в CONFIG.API_URL в admin.html.
-// 5) Смените пароль ниже на свой.
+// Создайте Google Таблицу → Расширения → Apps Script → вставьте код.
+// Затем Развернуть → Новое развёртывание → Веб-приложение.
+// Выполнять от: вас. Доступ: Все.
+// После развёртывания URL вставьте в CONFIG.API_URL в admin.html.
 const OWNER_PASSWORD = 'CHANGE_ME_1234';
 
 function sheet_() {
@@ -32,10 +31,11 @@ function doGet() {
 function doPost(e) {
   try {
     const body = JSON.parse(e.postData.contents || '{}');
+    if (body.action === 'login') return json_({ok:body.password === OWNER_PASSWORD});
     if (body.password !== OWNER_PASSWORD) return json_({ok:false,error:'Неверный пароль'});
     if (!Array.isArray(body.products)) return json_({ok:false,error:'Некорректные данные'});
     const sh = sheet_();
-    sh.getRange(2,1,Math.max(sh.getLastRow()-1,1),7).clearContent();
+    if (sh.getLastRow() > 1) sh.getRange(2,1,sh.getLastRow()-1,7).clearContent();
     const rows = body.products.map(p => [p.id||'',p.category||'',p.name||'',p.description||'',p.price||'',p.oldPrice||'',p.visible !== false]);
     if (rows.length) sh.getRange(2,1,rows.length,7).setValues(rows);
     return json_({ok:true,updatedAt:new Date().toISOString()});
