@@ -19,7 +19,7 @@ main{padding:48px 0 80px}.hero h1{font:400 48px Georgia,serif;margin:0 0 8px}.he
 <main><div class="wrap">
 <div class="hero"><h1>Личный кабинет</h1><p>Заказы, данные клиента и накопленные бонусы — всё в одном месте.</p></div>
 <section id="authCard" class="card">
-<div class="switch"><button id="loginTab" class="btn active">Войти</button><button id="registerTab" class="btn light">Регистрация</button></div>
+<div class="switch"><button type="button" id="loginTab" class="btn active" onclick="showTab(false)">Войти</button><button type="button" id="registerTab" class="btn light" onclick="showTab(true)">Регистрация</button></div>
 <div id="loginForm" class="form">
 <label>Номер телефона</label><input id="loginPhone" type="tel" inputmode="numeric" autocomplete="tel" placeholder="+7 900 000-00-00">
 <label>Пароль</label><input id="loginPassword" type="password" autocomplete="current-password" placeholder="••••••••">
