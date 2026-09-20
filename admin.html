@@ -130,7 +130,7 @@ async function loadOrders(){
   document.querySelectorAll("[data-status-save]").forEach(function(b){b.onclick=async function(){var id=b.getAttribute("data-status-save"),s=document.querySelector('[data-status="'+id+'"]');b.disabled=true;try{await request("/rest/v1/orders?id=eq."+encodeURIComponent(id),"PATCH",{status:s.value});await loadOrders()}catch(e){alert("Не удалось изменить статус: "+e.message)}finally{b.disabled=false}}});
  }catch(e){$("orders").innerHTML='<div class="muted">Ошибка заказов: '+escapeHtml(e.message)+'</div>'}
 }
-$("loginBtn").onclick=login;$("logoutBtn").onclick=logout;$("refreshOrders").onclick=loadOrders;$("toggleOrders").onclick=function(){var s=$("ordersSection"),b=$("toggleOrders"),hidden=s.hidden=!s.hidden;b.textContent=hidden?"Показать":"Свернуть"};
+$("loginBtn").onclick=login;$("logoutBtn").onclick=logout;$("refreshOrders").onclick=loadOrders;$("addBtn").onclick=addProduct;$("toggleOrders").onclick=function(){var s=$("ordersSection"),b=$("toggleOrders"),hidden=s.hidden=!s.hidden;b.textContent=hidden?"Показать":"Свернуть"};
 var saved=localStorage.getItem("bs_access");if(saved){token=saved;openApp()}
 })();
 </script></body></html>
