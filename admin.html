@@ -1,19 +1,48 @@
 <!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Букет Шаров — панель владельца</title><style>body{margin:0;background:#fbf7f4;color:#292322;font-family:Arial,sans-serif}.wrap{max-width:900px;margin:auto;padding:18px}.card,.item{background:#fff;border:1px solid #eadfda;border-radius:16px;padding:16px;margin:12px 0}.row{display:flex;gap:8px}.row>*{flex:1}input,select,textarea,button{box-sizing:border-box;width:100%;padding:11px;margin:5px 0;border-radius:10px;border:1px solid #ddd;font:inherit}button{background:#302827;color:#fff;border:0;font-weight:700;cursor:pointer}.save{background:#3b7d4f}.cancel{background:#eee;color:#292322}.danger{background:#a33}.move{width:48%;display:inline-block;background:#75606b}.muted{font-size:13px;color:#746b68}.item img{width:82px;height:82px;object-fit:cover;border-radius:10px;float:left;margin:0 12px 8px 0}.item:after{content:"";display:block;clear:both}.editbox{background:#faf7f5;border:1px solid #eadfda;border-radius:12px;padding:10px;margin-top:10px}.cat{font-size:13px;color:#756b67;font-weight:700}.order{border:1px solid #eadfda;border-radius:12px;padding:12px;margin:10px 0}.status{font-weight:700}</style></head><body><main class="wrap"><h1>Букет Шаров</h1><p class="muted">Панель владельца: каталог и заказы.</p><section id="login" class="card"><h2>Вход</h2><input id="email" type="email" value="Gabdrahimova_90@mail.ru"><input id="password" type="password" autocomplete="current-password" placeholder="Пароль"><button id="loginBtn" type="button">Войти</button><p id="loginMsg" class="muted"></p></section><section id="app" class="card" hidden><button id="logoutBtn">Выйти</button><h2>Заказы</h2><button id="refreshOrders">🔄 Обновить заказы</button><div id="orders">Загрузка...</div><h2>Добавить товар</h2><input id="name" placeholder="Название товара"><div class="row"><input id="price" type="number" min="0" placeholder="Цена, ₽"><input id="oldPrice" type="number" min="0" placeholder="Старая цена, ₽"></div><select id="category"><option>Букеты</option><option>Монобукеты</option><option>Шары</option><option>Сопутствующие товары</option></select><input id="photo" type="file" accept="image/*"><button id="addBtn">Добавить товар</button><p id="msg" class="muted"></p><h2>Каталог</h2><p class="muted">Кнопки ⬆️ и ⬇️ меняют порядок товаров внутри одной категории.</p><div id="list">Загрузка...</div></section></main><script>
-const URL='https://vpkqcyseuvswydttojtc.supabase.co',KEY='sb_publishable_9C6hJq0sFUveQgMz1GTZAA_T5em69jN',$=id=>document.getElementById(id);let accessToken=null,products=[];
-function H(json){const h={apikey:KEY};if(accessToken)h.Authorization='Bearer '+accessToken;if(json)h['Content-Type']='application/json';return h}
-async function api(p,o={}){const r=await fetch(URL+p,{...o,headers:{...H(!!o.body),...(o.headers||{})}}),d=await r.json().catch(()=>null);if(!r.ok)throw Error(d?.msg||d?.message||d?.error_description||'HTTP '+r.status);return d}
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])),cat=c=>{c=String(c||'').toLowerCase();return c.includes('моно')?'Монобукеты':c.includes('шар')?'Шары':c.includes('сопутств')||c.includes('подар')?'Сопутствующие товары':'Букеты'};
-async function login(){let b=$('loginBtn'),m=$('loginMsg'),e=$('email').value.trim(),p=$('password').value;if(!e||!p){m.textContent='Введите email и пароль.';return}b.disabled=true;m.textContent='Входим…';try{let s=await api('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email:e,password:p})});accessToken=s.access_token;localStorage.bs_access=accessToken;show()}catch(x){m.textContent='Ошибка входа: '+x.message}finally{b.disabled=false}}
-function show(){$('login').hidden=true;$('app').hidden=false;load();loadOrders()}function logout(){localStorage.removeItem('bs_access');accessToken=null;location.reload()}
-$('loginBtn').onclick=login;$('logoutBtn').onclick=logout;$('addBtn').onclick=addProduct;$('refreshOrders').onclick=loadOrders;
-async function load(){try{products=await api('/rest/v1/products?select=*&order=category.asc,sort_order.asc,created_at.desc')||[];render()}catch(e){$('list').textContent=e.message}}
-function render(){$('list').innerHTML=products.length?products.map(p=>{let s=products.filter(x=>cat(x.category)==cat(p.category)),pos=s.findIndex(x=>x.id==p.id);return `<div class="item"><img src="${esc(p.image_url||'')}"><b>${esc(p.name)}</b><br><span class="cat">${esc(cat(p.category))}</span><br>${Number(p.price).toLocaleString('ru-RU')} ₽ ${p.old_price?`<s>${Number(p.old_price).toLocaleString('ru-RU')} ₽</s>`:''}<br><button data-edit="${p.id}">✏️ Редактировать</button><button class="danger" data-delete="${p.id}">🗑 Удалить</button><button class="move" data-up="${p.id}" ${pos?'':'disabled'}>⬆️ Вверх</button><button class="move" data-down="${p.id}" ${pos==s.length-1?'disabled':''}>⬇️ Вниз</button><div class="editbox" id="edit-${p.id}" hidden><input id="ename-${p.id}" value="${esc(p.name)}"><div class="row"><input id="eprice-${p.id}" type="number" value="${Number(p.price)}"><input id="eold-${p.id}" type="number" value="${p.old_price??''}"></div><select id="ecat-${p.id}"><option>Букеты</option><option>Монобукеты</option><option>Шары</option><option>Сопутствующие товары</option></select><input id="ephoto-${p.id}" type="file" accept="image/*"><button class="save" data-save="${p.id}">Сохранить изменения</button><button class="cancel" data-cancel="${p.id}">Отмена</button><p class="muted" id="emsg-${p.id}"></p></div></div>`}).join(''):'Товаров пока нет';products.forEach(p=>{let s=$('ecat-'+p.id);if(s)s.value=cat(p.category)});document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>{$('edit-'+b.dataset.edit).hidden=!$('edit-'+b.dataset.edit).hidden});document.querySelectorAll('[data-cancel]').forEach(b=>b.onclick=()=>{$('edit-'+b.dataset.cancel).hidden=true});document.querySelectorAll('[data-save]').forEach(b=>b.onclick=()=>saveEdit(b.dataset.save));document.querySelectorAll('[data-delete]').forEach(b=>b.onclick=()=>deleteProduct(b.dataset.delete));document.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>moveProduct(b.dataset.up,-1));document.querySelectorAll('[data-down]').forEach(b=>b.onclick=()=>moveProduct(b.dataset.down,1))}
-async function upload(f){let path=crypto.randomUUID()+'-'+f.name.replace(/[^a-zA-Z0-9._-]/g,'_'),r=await fetch(URL+'/storage/v1/object/product-images/'+encodeURIComponent(path),{method:'POST',headers:{...H(), 'Content-Type':f.type||'image/jpeg'},body:f});if(!r.ok)throw Error('Ошибка загрузки фото');return{path,url:URL+'/storage/v1/object/public/product-images/'+encodeURIComponent(path)}}
-async function saveEdit(id){let p=products.find(x=>x.id==id),m=$('emsg-'+id),f=$('ephoto-'+id).files[0];m.textContent='Сохраняю…';try{let d={name:$('ename-'+id).value.trim(),price:Number($('eprice-'+id).value),old_price:$('eold-'+id).value===''?null:Number($('eold-'+id).value),category:$('ecat-'+id).value,updated_at:new Date().toISOString()};if(f){let u=await upload(f);Object.assign(d,{image_path:u.path,image_url:u.url});if(p.image_path)await fetch(URL+'/storage/v1/object/product-images',{method:'DELETE',headers:{...H(), 'Content-Type':'application/json'},body:JSON.stringify([p.image_path])})}await api('/rest/v1/products?id=eq.'+id,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify(d)});await load()}catch(e){m.textContent='Ошибка: '+e.message}}
-async function deleteProduct(id){let p=products.find(x=>x.id==id);if(!p||!confirm('Удалить товар «'+p.name+'» навсегда?'))return;try{await api('/rest/v1/products?id=eq.'+id,{method:'DELETE'});if(p.image_path)await fetch(URL+'/storage/v1/object/product-images',{method:'DELETE',headers:{...H(), 'Content-Type':'application/json'},body:JSON.stringify([p.image_path])});await load()}catch(e){alert(e.message)}}
-async function moveProduct(id,d){let p=products.find(x=>x.id==id),s=products.filter(x=>cat(x.category)==cat(p.category)).sort((a,b)=>(a.sort_order??0)-(b.sort_order??0)),i=s.findIndex(x=>x.id==id),j=i+d;if(j<0||j>=s.length)return;try{await api('/rest/v1/products?id=eq.'+s[i].id,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({sort_order:s[j].sort_order})});await api('/rest/v1/products?id=eq.'+s[j].id,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({sort_order:s[i].sort_order})});await load()}catch(e){alert(e.message)}}
-async function addProduct(){let n=$('name').value.trim(),p=$('price').value,o=$('oldPrice').value,c=$('category').value,f=$('photo').files[0];if(!n||p===''||!f){$('msg').textContent='Нужно указать название, цену и фото.';return}try{$('msg').textContent='Загружаю фото…';let u=await upload(f);await api('/rest/v1/products',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({name:n,price:Number(p),old_price:o===''?null:Number(o),category:c,image_path:u.path,image_url:u.url,active:true,sort_order:0})});$('msg').textContent='Товар добавлен ✅';await load()}catch(e){$('msg').textContent='Ошибка: '+e.message}}
-async function loadOrders(){try{let r=await api('/rest/v1/orders?select=*&order=created_at.desc');$('orders').innerHTML=r.length?r.map(o=>`<div class="order"><b>Заказ #${esc(o.id.slice(0,8).toUpperCase())}</b><br>${esc(o.customer_name)}<br>📞 ${esc(o.customer_phone)}<br>💰 ${Number(o.total).toLocaleString('ru-RU')} ₽<br><span class="status">${esc(o.status||'new')}</span><select onchange="changeStatus('${o.id}',this.value)"><option value="new">Новый</option><option value="confirmed">Подтверждён</option><option value="completed">Выполнен</option><option value="cancelled">Отменён</option></select></div>`).join(''):'Новых заказов нет.'}catch(e){$('orders').textContent=e.message}}
-async function changeStatus(id,s){try{await api('/rest/v1/orders?id=eq.'+id,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({status:s})});loadOrders()}catch(e){alert(e.message)}}
-if(localStorage.bs_access){accessToken=localStorage.bs_access;show()}
+(function(){
+var URL="https://vpkqcyseuvswydttojtc.supabase.co";
+var KEY="sb_publishable_9C6hJq0sFUveQgMz1GTZAA_T5em69jN";
+var token=null, products=[];
+function $(id){return document.getElementById(id)}
+function headers(){var h={"apikey":KEY};if(token)h.Authorization="Bearer "+token;return h}
+async function request(path,method,body){
+ var h=headers(); if(body!==undefined){h["Content-Type"]="application/json";h.Prefer="return=minimal"}
+ var r=await fetch(URL+path,{method:method||"GET",headers:h,body:body===undefined?undefined:JSON.stringify(body)});
+ var text=await r.text(),data;try{data=JSON.parse(text)}catch(e){data=text}
+ if(!r.ok)throw new Error((data&&data.message)||"HTTP "+r.status);
+ return data;
+}
+function escapeHtml(v){return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+async function login(){
+ var b=$("loginBtn"),m=$("loginMsg");b.disabled=true;m.textContent="Входим...";
+ try{
+  var r=await request("/auth/v1/token?grant_type=password","POST",{email:$("email").value.trim(),password:$("password").value});
+  token=r.access_token;localStorage.setItem("bs_access",token);openApp();
+ }catch(e){m.textContent="Ошибка входа: "+e.message}finally{b.disabled=false}
+}
+function openApp(){$("login").hidden=true;$("app").hidden=false;loadProducts();loadOrders()}
+function logout(){localStorage.removeItem("bs_access");location.reload()}
+async function loadProducts(){
+ try{products=await request("/rest/v1/products?select=*&order=category.asc,sort_order.asc,created_at.desc");renderProducts()}catch(e){$("list").textContent="Ошибка каталога: "+e.message}
+}
+function renderProducts(){
+ if(!products.length){$("list").textContent="Товаров пока нет";return}
+ var out="";
+ for(var i=0;i<products.length;i++){
+  var p=products[i];
+  out+='<div class="item"><img src="'+escapeHtml(p.image_url||"")+'"><b>'+escapeHtml(p.name)+'</b><br>'+escapeHtml(p.category||"Букеты")+'<br>'+Number(p.price).toLocaleString("ru-RU")+' ₽<br><button data-edit="'+p.id+'">✏️ Редактировать</button> <button class="danger" data-delete="'+p.id+'">🗑 Удалить</button></div>';
+ }
+ $("list").innerHTML=out;
+ document.querySelectorAll("[data-delete]").forEach(function(b){b.onclick=function(){deleteProduct(b.getAttribute("data-delete"))}});
+}
+async function deleteProduct(id){
+ var p=products.find(function(x){return String(x.id)===String(id)});if(!p||!confirm("Удалить товар?"))return;
+ try{await request("/rest/v1/products?id=eq."+encodeURIComponent(id),"DELETE");loadProducts()}catch(e){alert(e.message)}
+}
+async function loadOrders(){
+ try{var r=await request("/rest/v1/orders?select=*&order=created_at.desc");$("orders").textContent=r.length?"Заказов: "+r.length:"Новых заказов нет."}catch(e){$("orders").textContent="Ошибка заказов: "+e.message}
+}
+$("loginBtn").onclick=login;$("logoutBtn").onclick=logout;$("refreshOrders").onclick=loadOrders;
+var saved=localStorage.getItem("bs_access");if(saved){token=saved;openApp()}
+})();
 </script></body></html>
