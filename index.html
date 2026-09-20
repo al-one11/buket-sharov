@@ -84,11 +84,11 @@ section{padding:48px 0}.head{display:flex;align-items:end;justify-content:space-
 const SUPABASE_URL='https://vpkqcyseuvswydttojtc.supabase.co';
 const SUPABASE_KEY='sb_publishable_9C6hJq0sFUveQgMz1GTZAA_T5em69jN';
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-const categories=['Букеты','Монобукеты','Шары','Сопутствующие товары'];
+const categories=['Букеты','Монобукеты','Композиции','Шары','Сопутствующие товары'];
 const grid=document.getElementById('catalog-grid'),cats=document.getElementById('cats'),title=document.getElementById('category-title'),drawer=document.getElementById('drawer'),cartView=document.getElementById('cartView');
 let products=[],selected='Букеты',cart=JSON.parse(localStorage.getItem('buketCart')||'[]');
 function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
-function norm(c){const s=String(c||'').trim().toLowerCase();if(s.includes('моно'))return'Монобукеты';if(s.includes('шар'))return'Шары';if(s.includes('сопутств')||s.includes('подар'))return'Сопутствующие товары';return'Букеты'}
+function norm(c){const s=String(c||'').trim().toLowerCase();if(s.includes('моно'))return'Монобукеты';if(s.includes('композ'))return'Композиции';if(s.includes('шар'))return'Шары';if(s.includes('сопутств')||s.includes('подар'))return'Сопутствующие товары';return'Букеты'}
 function updateCount(){document.getElementById('cartCount').textContent=cart.reduce((n,x)=>n+x.qty,0)}
 function saveCart(){localStorage.setItem('buketCart',JSON.stringify(cart));updateCount();renderCart()}
 function addToCart(id){const p=products.find(x=>String(x.id)===String(id));if(!p)return;const found=cart.find(x=>String(x.id)===String(id));if(found)found.qty++;else cart.push({id:p.id,name:p.name,price:Number(p.price),image_url:p.image_url||'',qty:1});saveCart()}
