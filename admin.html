@@ -34,6 +34,12 @@ function renderProducts(){
  }
  $("list").innerHTML=out;
  document.querySelectorAll("[data-delete]").forEach(function(b){b.onclick=function(){deleteProduct(b.getAttribute("data-delete"))}});
+ document.querySelectorAll("[data-edit]").forEach(function(b){b.onclick=function(){editProduct(b.getAttribute("data-edit"))}});
+}
+async function editProduct(id){
+ var p=products.find(function(x){return String(x.id)===String(id)});if(!p)return;
+ var box=document.createElement("div");box.className="editbox";box.innerHTML='<input id="en_'+id+'" value="'+escapeHtml(p.name)+'" placeholder="Название"><div class="row"><input id="ep_'+id+'" type="number" min="0" value="'+Number(p.price||0)+'" placeholder="Цена"><input id="eo_'+id+'" type="number" min="0" value="'+Number(p.old_price||0)+'" placeholder="Старая цена"></div><select id="ec_'+id+'"><option>Букеты</option><option>Монобукеты</option><option>Шары</option><option>Сопутствующие товары</option></select><button class="save" id="es_'+id+'">Сохранить</button><button class="cancel" id="ex_'+id+'">Отмена</button><p id="em_'+id+'" class="muted"></p>';
+ var item=document.querySelector('[data-edit="'+id+'"]').parentElement;item.appendChild(box);$("ec_"+id).value=p.category||"Букеты";$("es_"+id).onclick=async function(){var m=$("em_"+id);m.textContent="Сохраняем...";try{await request("/rest/v1/products?id=eq."+encodeURIComponent(id),"PATCH",{name:$("en_"+id).value.trim(),price:Number($("ep_"+id).value),old_price:Number($("eo_"+id).value)||null,category:$("ec_"+id).value});await loadProducts()}catch(e){m.textContent="Ошибка: "+e.message}};$("ex_"+id).onclick=function(){box.remove()};
 }
 async function deleteProduct(id){
  var p=products.find(function(x){return String(x.id)===String(id)});if(!p||!confirm("Удалить товар?"))return;
