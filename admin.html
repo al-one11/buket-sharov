@@ -1,8 +1,8 @@
-<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Букет Шаров — панель владельца</title><style>body{margin:0;background:#fbf7f4;color:#292322;font-family:Arial,sans-serif}.wrap{max-width:900px;margin:auto;padding:18px}.card,.item{background:#fff;border:1px solid #eadfda;border-radius:16px;padding:16px;margin:12px 0}.row{display:flex;gap:8px}.row>*{flex:1}input,select,textarea,button{box-sizing:border-box;width:100%;padding:11px;margin:5px 0;border-radius:10px;border:1px solid #ddd;font:inherit}button{background:#302827;color:#fff;border:0;font-weight:700;cursor:pointer}.save{background:#3b7d4f}.cancel{background:#eee;color:#292322}.danger{background:#a33}.move{width:48%;display:inline-block;background:#75606b}.muted{font-size:13px;color:#746b68}.item img{width:82px;height:82px;object-fit:cover;border-radius:10px;float:left;margin:0 12px 8px 0}.item:after{content:"";display:block;clear:both}.editbox{background:#faf7f5;border:1px solid #eadfda;border-radius:12px;padding:10px;margin-top:10px}.cat{font-size:13px;color:#756b67;font-weight:700}.order{border:1px solid #eadfda;border-radius:12px;padding:12px;margin:10px 0}.status{font-weight:700}</style></head><body><main class="wrap"><h1>Букет Шаров</h1><p class="muted">Панель владельца: каталог и заказы.</p><section id="login" class="card"><h2>Вход</h2><input id="email" type="email" value="Gabdrahimova_90@mail.ru"><input id="password" type="password" autocomplete="current-password" placeholder="Пароль"><button id="loginBtn" type="button">Войти</button><p id="loginMsg" class="muted"></p></section><section id="app" class="card" hidden><button id="logoutBtn">Выйти</button><h2>Заказы</h2><button id="refreshOrders">🔄 Обновить заказы</button><div id="orders">Загрузка...</div><h2>Добавить товар</h2><input id="name" placeholder="Название товара"><div class="row"><input id="price" type="number" min="0" placeholder="Цена, ₽"><input id="oldPrice" type="number" min="0" placeholder="Старая цена, ₽"></div><select id="category"><option>Букеты</option><option>Монобукеты</option><option>Шары</option><option>Сопутствующие товары</option></select><input id="photo" type="file" accept="image/*"><button id="addBtn">Добавить товар</button><p id="msg" class="muted"></p><h2>Каталог</h2><p class="muted">Кнопки ⬆️ и ⬇️ меняют порядок товаров внутри одной категории.</p><div id="list">Загрузка...</div></section></main><script>
+<!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Букет Шаров — панель владельца</title><style>body{margin:0;background:#fbf7f4;color:#292322;font-family:Arial,sans-serif}.wrap{max-width:900px;margin:auto;padding:18px}.card,.item{background:#fff;border:1px solid #eadfda;border-radius:16px;padding:16px;margin:12px 0}.row{display:flex;gap:8px}.row>*{flex:1}input,select,textarea,button{box-sizing:border-box;width:100%;padding:11px;margin:5px 0;border-radius:10px;border:1px solid #ddd;font:inherit}button{background:#302827;color:#fff;border:0;font-weight:700;cursor:pointer}.save{background:#3b7d4f}.cancel{background:#eee;color:#292322}.danger{background:#a33}.move{width:48%;display:inline-block;background:#75606b}.admin-cats{display:flex;gap:8px;overflow:auto;padding:4px 0 12px;position:sticky;top:0;background:#fff;z-index:2}.admin-cat{width:auto;white-space:nowrap;padding:9px 14px;border-radius:999px;background:#f7efec;color:#5d504c}.admin-cat.active{background:#302827;color:#fff}.product-list{display:grid;gap:10px}.drag-hint{font-size:12px;color:#746b68;margin:0 0 10px}.drag-item{cursor:grab}.drag-item.dragging{opacity:.45}.drag-handle{font-size:20px;float:right;cursor:grab}.move-row{display:flex;gap:6px}.move-row button{margin:5px 0;width:50%}.muted{font-size:13px;color:#746b68}.item img{width:82px;height:82px;object-fit:cover;border-radius:10px;float:left;margin:0 12px 8px 0}.item:after{content:"";display:block;clear:both}.editbox{background:#faf7f5;border:1px solid #eadfda;border-radius:12px;padding:10px;margin-top:10px}.cat{font-size:13px;color:#756b67;font-weight:700}.order{border:1px solid #eadfda;border-radius:12px;padding:12px;margin:10px 0}.status{font-weight:700}</style></head><body><main class="wrap"><h1>Букет Шаров</h1><p class="muted">Панель владельца: каталог и заказы.</p><section id="login" class="card"><h2>Вход</h2><input id="email" type="email" value="Gabdrahimova_90@mail.ru"><input id="password" type="password" autocomplete="current-password" placeholder="Пароль"><button id="loginBtn" type="button">Войти</button><p id="loginMsg" class="muted"></p></section><section id="app" class="card" hidden><button id="logoutBtn">Выйти</button><h2>Заказы</h2><button id="refreshOrders">🔄 Обновить заказы</button><div id="orders">Загрузка...</div><h2>Добавить товар</h2><input id="name" placeholder="Название товара"><div class="row"><input id="price" type="number" min="0" placeholder="Цена, ₽"><input id="oldPrice" type="number" min="0" placeholder="Старая цена, ₽"></div><select id="category"><option>Букеты</option><option>Монобукеты</option><option>Шары</option><option>Сопутствующие товары</option></select><input id="photo" type="file" accept="image/*"><button id="addBtn">Добавить товар</button><p id="msg" class="muted"></p><h2>Каталог</h2><div id="adminCats" class="admin-cats"></div><p class="drag-hint">Выберите раздел и просто перетащите товар мышкой/пальцем, чтобы поменять порядок. ⬆️⬇️ — запасной вариант.</p><div id="list" class="product-list">Загрузка...</div></section></main><script>
 (function(){
 var URL="https://vpkqcyseuvswydttojtc.supabase.co";
 var KEY="sb_publishable_9C6hJq0sFUveQgMz1GTZAA_T5em69jN";
-var token=null, products=[];
+var token=null, products=[],selectedCategory="Букеты";
 function $(id){return document.getElementById(id)}
 function headers(){var h={"apikey":KEY};if(token)h.Authorization="Bearer "+token;return h}
 async function request(path,method,body){
@@ -26,17 +26,44 @@ async function loadProducts(){
  try{products=await request("/rest/v1/products?select=*&order=category.asc,sort_order.asc,created_at.desc");renderProducts()}catch(e){$("list").textContent="Ошибка каталога: "+e.message}
 }
 function renderProducts(){
- if(!products.length){$("list").textContent="Товаров пока нет";return}
+ renderAdminCats();
+ var visible=products.filter(function(p){return String(p.category||"Букеты")===selectedCategory});
+ if(!visible.length){$("list").textContent="В этом разделе пока нет товаров";return}
  var out="";
- for(var i=0;i<products.length;i++){
-  var p=products[i];
-  out+='<div class="item"><img src="'+escapeHtml(p.image_url||"")+'"><b>'+escapeHtml(p.name)+'</b><br>'+escapeHtml(p.category||"Букеты")+'<br>'+Number(p.price).toLocaleString("ru-RU")+' ₽<br><button data-up="'+p.id+'">⬆️</button> <button data-down="'+p.id+'">⬇️</button><br><button data-edit="'+p.id+'">✏️ Редактировать</button> <button class="danger" data-delete="'+p.id+'">🗑 Удалить</button></div>';
+ for(var i=0;i<visible.length;i++){
+  var p=visible[i];
+  out+='<div class="item drag-item" draggable="true" data-product-id="'+p.id+'"><span class="drag-handle">☷</span><img src="'+escapeHtml(p.image_url||"")+'"><b>'+escapeHtml(p.name)+'</b><br>'+escapeHtml(p.category||"Букеты")+'<br>'+Number(p.price).toLocaleString("ru-RU")+' ₽<div class="move-row"><button data-up="'+p.id+'">⬆️ Выше</button><button data-down="'+p.id+'">⬇️ Ниже</button></div><button data-edit="'+p.id+'">✏️ Редактировать</button> <button class="danger" data-delete="'+p.id+'">🗑 Удалить</button></div>';
  }
  $("list").innerHTML=out;
  document.querySelectorAll("[data-delete]").forEach(function(b){b.onclick=function(){deleteProduct(b.getAttribute("data-delete"))}});
  document.querySelectorAll("[data-edit]").forEach(function(b){b.onclick=function(){editProduct(b.getAttribute("data-edit"))}});
  document.querySelectorAll("[data-up]").forEach(function(b){b.onclick=function(){moveProduct(b.getAttribute("data-up"),-1)}});
  document.querySelectorAll("[data-down]").forEach(function(b){b.onclick=function(){moveProduct(b.getAttribute("data-down"),1)}});
+ var dragged=null;
+ document.querySelectorAll(".drag-item").forEach(function(el){
+  el.addEventListener("dragstart",function(){dragged=el;el.classList.add("dragging")});
+  el.addEventListener("dragend",function(){el.classList.remove("dragging");dragged=null});
+  el.addEventListener("dragover",function(e){e.preventDefault()});
+  el.addEventListener("drop",async function(e){
+   e.preventDefault();if(!dragged||dragged===el)return;
+   var ids=Array.from(document.querySelectorAll(".drag-item")).map(function(x){return x.getAttribute("data-product-id")});
+   var from=ids.indexOf(dragged.getAttribute("data-product-id")),to=ids.indexOf(el.getAttribute("data-product-id"));
+   if(from<0||to<0)return;
+   ids.splice(from,1);ids.splice(to,0,dragged.getAttribute("data-product-id"));
+   try{await saveCategoryOrder(ids)}catch(err){alert("Не удалось сохранить порядок: "+err.message)}
+  });
+ });
+}
+function renderAdminCats(){
+ var cats=["Букеты","Монобукеты","Шары","Сопутствующие товары"];
+ $("adminCats").innerHTML=cats.map(function(c){return '<button type="button" class="admin-cat '+(c===selectedCategory?"active":"")+'" data-admin-cat="'+escapeHtml(c)+'">'+escapeHtml(c)+'</button>'}).join("");
+ document.querySelectorAll("[data-admin-cat]").forEach(function(b){b.onclick=function(){selectedCategory=b.getAttribute("data-admin-cat");renderProducts()}});
+}
+async function saveCategoryOrder(ids){
+ for(var i=0;i<ids.length;i++){
+  await request("/rest/v1/products?id=eq."+encodeURIComponent(ids[i]),"PATCH",{sort_order:i});
+ }
+ await loadProducts();
 }
 async function moveProduct(id,dir){
  var index=products.findIndex(function(x){return String(x.id)===String(id)});
