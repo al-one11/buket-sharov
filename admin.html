@@ -100,7 +100,32 @@ async function deleteProduct(id){
  try{await request("/rest/v1/products?id=eq."+encodeURIComponent(id),"DELETE");loadProducts()}catch(e){alert(e.message)}
 }
 async function loadOrders(){
- try{var r=await request("/rest/v1/orders?select=*&order=created_at.desc");$("orders").textContent=r.length?"Заказов: "+r.length:"Новых заказов нет."}catch(e){$("orders").textContent="Ошибка заказов: "+e.message}
+ try{
+  var r=await request("/rest/v1/orders?select=*&order=created_at.desc");
+  if(!r.length){$("orders").innerHTML='<div class="muted">История заказов пока пустая.</div>';return}
+  var ids=r.map(function(o){return o.id});
+  var items=[];
+  if(ids.length){
+   items=await request("/rest/v1/order_items?select=order_id,product_name,price,quantity&order=created_at.asc");
+  }
+  var byOrder={};
+  items.forEach(function(x){(byOrder[x.order_id]||(byOrder[x.order_id]=[])).push(x)});
+  var statusLabel={new:"Новый",confirmed:"Подтверждён",completed:"Выполнен",cancelled:"Отменён"};
+  var out='<div class="muted" style="margin:4px 0 12px">Всего заказов: <b>'+r.length+'</b></div>';
+  r.forEach(function(o){
+   var list=byOrder[o.id]||[];
+   var created=new Date(o.created_at).toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
+   var number=String(o.id).slice(0,8).toUpperCase();
+   var productsHtml=list.length?'<ul style="margin:8px 0 10px;padding-left:20px">'+list.map(function(x){return '<li>'+escapeHtml(x.product_name)+' × '+Number(x.quantity||0)+' — '+Number(x.price||0).toLocaleString("ru-RU")+' ₽</li>'}).join("")+'</ul>':'<div class="muted">Состав заказа не найден</div>';
+   var address=o.delivery_address?'<div><b>Адрес:</b> '+escapeHtml(o.delivery_address)+'</div>':'';
+   var comment=o.comment?'<div><b>Комментарий:</b> '+escapeHtml(o.comment)+'</div>':'';
+   var bonus=Number(o.bonus_spent||0);
+   out+='<div class="order"><div style="display:flex;justify-content:space-between;gap:10px;align-items:flex-start"><div><b>Заказ #'+number+'</b><div class="muted">'+created+'</div></div><b>'+Number(o.total||0).toLocaleString("ru-RU")+' ₽</b></div><hr style="border:0;border-top:1px solid #eadfda;margin:10px 0"><div><b>'+escapeHtml(o.customer_name||"Без имени")+'</b> · <a href="tel:'+escapeHtml(o.customer_phone||"")+'">'+escapeHtml(o.customer_phone||"")+'</a></div>'+address+comment+(bonus?'<div class="muted">Бонусами списано: '+bonus.toLocaleString("ru-RU")+' ₽</div>':'')+productsHtml+'<div style="display:flex;gap:6px;flex-wrap:wrap"><select data-status="'+escapeHtml(o.id)+'" style="width:auto;min-width:170px;margin:5px 0"><option value="new">Новый</option><option value="confirmed">Подтверждён</option><option value="completed">Выполнен</option><option value="cancelled">Отменён</option></select><button type="button" data-status-save="'+escapeHtml(o.id)+'" style="width:auto">Сохранить статус</button></div><div class="muted">Статус: '+escapeHtml(statusLabel[o.status]||o.status||"Не указан")+'</div></div>';
+  });
+  $("orders").innerHTML=out;
+  r.forEach(function(o){var s=document.querySelector('[data-status="'+o.id+'"]');if(s)s.value=o.status||"new"});
+  document.querySelectorAll("[data-status-save]").forEach(function(b){b.onclick=async function(){var id=b.getAttribute("data-status-save"),s=document.querySelector('[data-status="'+id+'"]');b.disabled=true;try{await request("/rest/v1/orders?id=eq."+encodeURIComponent(id),"PATCH",{status:s.value});await loadOrders()}catch(e){alert("Не удалось изменить статус: "+e.message)}finally{b.disabled=false}}});
+ }catch(e){$("orders").innerHTML='<div class="muted">Ошибка заказов: '+escapeHtml(e.message)+'</div>'}
 }
 $("loginBtn").onclick=login;$("logoutBtn").onclick=logout;$("refreshOrders").onclick=loadOrders;
 var saved=localStorage.getItem("bs_access");if(saved){token=saved;openApp()}
