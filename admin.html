@@ -30,11 +30,28 @@ function renderProducts(){
  var out="";
  for(var i=0;i<products.length;i++){
   var p=products[i];
-  out+='<div class="item"><img src="'+escapeHtml(p.image_url||"")+'"><b>'+escapeHtml(p.name)+'</b><br>'+escapeHtml(p.category||"Букеты")+'<br>'+Number(p.price).toLocaleString("ru-RU")+' ₽<br><button data-edit="'+p.id+'">✏️ Редактировать</button> <button class="danger" data-delete="'+p.id+'">🗑 Удалить</button></div>';
+  out+='<div class="item"><img src="'+escapeHtml(p.image_url||"")+'"><b>'+escapeHtml(p.name)+'</b><br>'+escapeHtml(p.category||"Букеты")+'<br>'+Number(p.price).toLocaleString("ru-RU")+' ₽<br><button data-up="'+p.id+'">⬆️</button> <button data-down="'+p.id+'">⬇️</button><br><button data-edit="'+p.id+'">✏️ Редактировать</button> <button class="danger" data-delete="'+p.id+'">🗑 Удалить</button></div>';
  }
  $("list").innerHTML=out;
  document.querySelectorAll("[data-delete]").forEach(function(b){b.onclick=function(){deleteProduct(b.getAttribute("data-delete"))}});
  document.querySelectorAll("[data-edit]").forEach(function(b){b.onclick=function(){editProduct(b.getAttribute("data-edit"))}});
+ document.querySelectorAll("[data-up]").forEach(function(b){b.onclick=function(){moveProduct(b.getAttribute("data-up"),-1)}});
+ document.querySelectorAll("[data-down]").forEach(function(b){b.onclick=function(){moveProduct(b.getAttribute("data-down"),1)}});
+}
+async function moveProduct(id,dir){
+ var index=products.findIndex(function(x){return String(x.id)===String(id)});
+ if(index<0)return;
+ var p=products[index], targetIndex=index+dir;
+ while(targetIndex>=0 && targetIndex<products.length && String(products[targetIndex].category||"")!==String(p.category||"")) targetIndex+=dir;
+ if(targetIndex<0 || targetIndex>=products.length || String(products[targetIndex].category||"")!==String(p.category||""))return;
+ var target=products[targetIndex];
+ var a=Number(p.sort_order||0), b=Number(target.sort_order||0);
+ try{
+  var patch1={sort_order:b}, patch2={sort_order:a};
+  await request("/rest/v1/products?id=eq."+encodeURIComponent(p.id),"PATCH",patch1);
+  await request("/rest/v1/products?id=eq."+encodeURIComponent(target.id),"PATCH",patch2);
+  await loadProducts();
+ }catch(e){alert("Не удалось поменять порядок: "+e.message)}
 }
 async function uploadProductImage(file){var clean=file.name.replace(/[^a-zA-Z0-9._-]/g,"_"),path=Date.now()+"-"+Math.random().toString(36).slice(2)+"-"+clean;var h={"apikey":KEY,"Authorization":"Bearer "+token,"x-upsert":"false","Content-Type":file.type||"image/jpeg"};var r=await fetch(URL+"/storage/v1/object/product-images/"+encodeURIComponent(path),{method:"POST",headers:h,body:file});var t=await r.text();if(!r.ok){var d;try{d=JSON.parse(t)}catch(e){}throw new Error((d&&d.message)||t||("HTTP "+r.status))}return {path:path,url:URL+"/storage/v1/object/public/product-images/"+path}}
 async function editProduct(id){
