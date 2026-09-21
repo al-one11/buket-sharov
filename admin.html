@@ -173,4 +173,28 @@ if(o&&m){
  document.addEventListener("keydown",function(e){if(e.key==="Escape"){m.classList.remove("open");m.setAttribute("aria-hidden","true")}});
 }
 })();
+</script><script>
+(function(){
+ var btn=document.getElementById("sideMenuBtn"),drawer=document.getElementById("sideDrawer"),overlay=document.getElementById("sideOverlay"),close=document.getElementById("sideClose");
+ if(!btn||!drawer||!overlay)return;
+ function open(){drawer.classList.add("open");overlay.classList.add("open");}
+ function shut(){drawer.classList.remove("open");overlay.classList.remove("open");}
+ btn.onclick=open;close.onclick=shut;overlay.onclick=shut;
+ document.addEventListener("keydown",function(e){if(e.key==="Escape")shut()});
+ document.querySelectorAll("[data-side-target]").forEach(function(b){
+  b.onclick=function(){
+   var el=document.getElementById(b.getAttribute("data-side-target"));
+   shut();
+   if(el)el.scrollIntoView({behavior:"smooth",block:"start"});
+  };
+ });
+ document.querySelectorAll("[data-side-category]").forEach(function(b){
+  b.onclick=function(){
+   var cat=b.getAttribute("data-side-category");
+   var target=document.querySelector('[data-admin-cat="'+cat.replace(/"/g,'\\\"')+'"]');
+   shut();
+   if(target){target.click();setTimeout(function(){document.getElementById("adminCats").scrollIntoView({behavior:"smooth",block:"start"});},50);}
+  };
+ });
+})();
 </script></body></html>
