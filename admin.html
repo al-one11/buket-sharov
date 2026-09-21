@@ -114,8 +114,8 @@ async function loadOrders(){
    var created=new Date(o.created_at).toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",year:"numeric",hour:"2-digit",minute:"2-digit"});
    var number=String(o.id).slice(0,8).toUpperCase();
    var productsHtml=list.length?'<ul style="margin:8px 0 10px;padding-left:20px">'+list.map(function(x){return '<li>'+escapeHtml(x.product_name)+' × '+Number(x.quantity||0)+' — '+Number(x.price||0).toLocaleString("ru-RU")+' ₽</li>'}).join("")+'</ul>':'<div class="muted">Состав заказа не найден</div>';
-   var buyerName=escapeHtml(o.customer_name||"Не указан"),buyerPhone=escapeHtml(o.customer_phone||"Не указан");
-   var recipientName=escapeHtml(o.recipient_name||"Не указан"),recipientPhone=escapeHtml(o.recipient_phone||"Не указан");
+   var legacy=!o.recipient_name&&!o.recipient_phone;var buyerName=escapeHtml(legacy?"Не указан (старый заказ)":(o.customer_name||"Не указан")),buyerPhone=escapeHtml(legacy?"—":(o.customer_phone||"Не указан"));
+   var recipientName=escapeHtml(legacy?(o.customer_name||"Не указан"):(o.recipient_name||"Не указан")),recipientPhone=escapeHtml(legacy?(o.customer_phone||"Не указан"):(o.recipient_phone||"Не указан"));
    var people='<div class="order-people"><div class="order-person-card"><strong>👤 Заказчик</strong><div class="person-name">'+buyerName+'</div><div class="person-phone">'+(o.customer_phone?'<a href="tel:'+buyerPhone+'">'+buyerPhone+'</a>':buyerPhone)+'</div><div class="muted" style="margin-top:4px">Оформил заказ на сайте</div></div><div class="order-person-card recipient"><strong>🎁 Получатель</strong><div class="person-name">'+recipientName+'</div><div class="person-phone">'+(o.recipient_phone?'<a href="tel:'+recipientPhone+'">'+recipientPhone+'</a>':recipientPhone)+'</div><div class="muted" style="margin-top:4px">Кому передать заказ</div></div></div>';
    var address=o.delivery_address?'<div><b>Получение / адрес:</b> '+escapeHtml(o.delivery_address)+'</div>':'';
    var comment=o.comment?'<div style="margin-top:6px"><b>Комментарий:</b> '+escapeHtml(o.comment)+'</div>':'';
