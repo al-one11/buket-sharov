@@ -121,8 +121,7 @@ function renderOrderComment(raw){
   else other.push(s);
  });
  function box(icon,title,value){
-  if(!value)return "";
-  return '<div class="order-extra"><strong>'+icon+' '+title+'</strong><div class="order-extra-text">'+escapeHtml(value)+'</div></div>';
+  return '<div class="order-extra"><strong>'+icon+' '+title+'</strong>'+(value?'<div class="order-extra-text">'+escapeHtml(value)+'</div>':'')+'</div>';
  }
  function needIcon(value){
   return /^(нужна|нужно|да|yes|есть)/i.test(String(value||""))?'✅':'❌';
