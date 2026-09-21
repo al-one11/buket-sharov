@@ -103,13 +103,19 @@ async function deleteProduct(id){
 }
 function renderOrderComment(raw){
  if(!raw)return "";
- var lines=String(raw).split(/\r?\n|\s*\|\s*/).map(function(x){return x.trim()}).filter(Boolean);
+ var lines=String(raw).split(/\r?\n/).map(function(x){return x.trim()}).filter(Boolean);
  var photo="",card="",cardText="",note="",other=[];
  lines.forEach(function(s){
   var m;
   if((m=s.match(/^Фото(?: букета)?\s*:\s*(.*)$/i))) photo=m[1];
-  else if((m=s.match(/^Открытка\s*:\s*(.*)$/i))) card=m[1];
-  else if((m=s.match(/^Текст(?: на)? открытки\s*:\s*(.*)$/i))) cardText=m[1];
+  else if((m=s.match(/^Открытка\s*:\s*(.*)$/i))){
+   var v=m[1].trim();
+   var cm=v.match(/^(нужна|нужна\s*—)\s*(.*)$/i);
+   if(cm){
+    card=cm[1].replace(/\s*—\s*$/,"");
+    if(cm[2]) cardText=cm[2].replace(/^—\s*/,"").trim().replace(/^«|»$/g,"");
+   }else card=v;
+  } else if((m=s.match(/^Текст(?: на)? открытки\s*:\s*(.*)$/i))) cardText=m[1];
   else if((m=s.match(/^Комментарий(?: курьеру)?\s*:\s*(.*)$/i))) note=m[1];
   else if(/^Получение\s*:/i.test(s)){}
   else other.push(s);
