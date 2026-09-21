@@ -124,7 +124,14 @@ function renderOrderComment(raw){
   if(!value)return "";
   return '<div class="order-extra"><strong>'+icon+' '+title+'</strong><div class="order-extra-text">'+escapeHtml(value)+'</div></div>';
  }
- var out=box("📸","Фото букета",photo)+box("💌","Открытка",card)+box("✍️","Текст открытки",cardText)+box("💬","Комментарий",note);
+ function needIcon(value){
+  return /^(нужна|нужно|да|yes|есть)/i.test(String(value||""))?'✅':'❌';
+ }
+ var out="";
+ out+=box(needIcon(photo)+" "+ "Фото букета", "", photo.replace(/^(нужно|нужна|да|yes|есть)\s*/i,""));
+ out+=box(needIcon(card)+" "+ "Открытка", "", "");
+ if(cardText) out+=box("✍️","Текст открытки",cardText);
+ if(note) out+=box("💬","Комментарий",note);
  if(other.length)out+=box("📝","Дополнительная информация",other.join("\n"));
  return out?'<div class="order-extra-grid">'+out+'</div>':"";
 }
